@@ -24,12 +24,19 @@ def every_ten_seconds
   end
 end
 
-src_conn = Faraday.new(SOURCE) { |conn| conn.basic_auth SOURCE_USER, SOURCE_PASS }
-dest_conn = Faraday.new(DEST) { |conn| conn.basic_auth DEST_USER, DEST_PASS }
+src_conn = Faraday.new(url: SOURCE) do |conn|
+  conn.basic_auth SOURCE_USER, SOURCE_PASS if SOURCE_PASS
+  conn.adapter Faraday.default_adapter
+end
+
+dest_conn = Faraday.new(url: DEST) do |conn|
+  conn.basic_auth DEST_USER, DEST_PASS  if DEST_PASS
+  conn.adapter Faraday.default_adapter
+end
 
 every_ten_seconds do
   puts 'connecting to cluster'
-  resp = src_conn.get(SOURCE + '/_cluster/stats')
+  resp = src_conn.get('/_cluster/stats')
   p resp unless resp.success?
   stats = {
     cluster_url: SOURCE,
@@ -38,7 +45,7 @@ every_ten_seconds do
     timestamp: Time.now.getutc.strftime("%Y/%m/%d %T")
   }
   puts stats
-  dest_conn.post(DEST + '/remote-cluster-statistics/_doc/') do |req|
+  dest_conn.post('/remote-cluster-statistics/_doc/') do |req|
     req.headers['Content-Type'] = 'application/json'
     req.body = JSON.dump(stats)
   end
