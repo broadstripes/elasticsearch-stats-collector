@@ -25,7 +25,6 @@ def every_ten_seconds
 end
 
 def each_node(stats)
-  p stats
   stats['nodes'].each_pair do |id, node|
     yield({
       cluster_url: SOURCE,
