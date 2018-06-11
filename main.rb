@@ -49,7 +49,7 @@ end
 
 every_ten_seconds do
   puts 'connecting to cluster'
-  resp = src_conn.get('/_cluster/stats')
+  resp = src_conn.get('/_nodes/stats')
   p resp unless resp.success?
   each_node(JSON.parse(resp.body)) do |node_stat|
     dest_conn.post('/remote-node-statistics/_doc/') do |req|
