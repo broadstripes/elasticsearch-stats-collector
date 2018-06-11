@@ -25,11 +25,12 @@ def every_ten_seconds
 end
 
 def each_node(stats)
+  p stats
   stats['nodes'].each_pair do |id, node|
-    node['node_id'] = id
     yield({
       cluster_url: SOURCE,
       opsworks_stack: STACK,
+      node_id: id,
       stats: node,
       timestamp: Time.now.getutc.strftime("%Y/%m/%d %T")
     })
